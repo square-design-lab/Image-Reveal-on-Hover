@@ -250,14 +250,18 @@
     }
 
     function init() {
-        var blocks = document.querySelectorAll('.sqs-block-summary-v2');
-        if (!blocks.length) return;
+        var sections = document.querySelectorAll('[data-section-id]');
+        sections.forEach(function (section) {
+            var id = section.getAttribute('data-section-id');
+            if (!id || !/^image-hover-reveal(-\d+)?$/.test(id)) return;
 
-        blocks.forEach(function (block) {
-            if (block.classList.contains('sdl-reveal-ready')) return;
-            var items = extractItems(block);
-            if (!items.length) return;
-            buildUI(block, items);
+            var blocks = section.querySelectorAll('.sqs-block-summary-v2');
+            blocks.forEach(function (block) {
+                if (block.classList.contains('sdl-reveal-ready')) return;
+                var items = extractItems(block);
+                if (!items.length) return;
+                buildUI(block, items);
+            });
         });
     }
 

@@ -3,7 +3,8 @@
    ============================================================ */
 
 /* --- Hide original summary block --- */
-.sdl-reveal-ready .summary-block-wrapper { display: none !important; }
+.sdl-reveal-ready .summary-block-wrapper,
+.sdl-reveal-ready .summary-block-setting { display: none !important; }
 
 /* --- Container --- */
 .sdl-reveal {
