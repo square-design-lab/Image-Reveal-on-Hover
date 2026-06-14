@@ -1,0 +1,308 @@
+/* ============================================================
+   SDL Image Reveal on Hover  v1.0
+   ============================================================ */
+
+/* --- Hide original summary block --- */
+.sdl-reveal-ready .summary-block-wrapper { display: none !important; }
+
+/* --- Container --- */
+.sdl-reveal {
+    position: relative;
+    width: 100%;
+    font-family: var(--sdl-reveal-font, inherit);
+}
+
+/* --- Row --- */
+.sdl-reveal-row {
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: var(--sdl-reveal-row-pad-y, 28px) var(--sdl-reveal-row-pad-x, 0);
+    border-bottom: var(--sdl-reveal-divider-width, 1px) solid var(--sdl-reveal-divider-color, rgba(0,0,0,0.1));
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    overflow: visible;
+}
+
+.sdl-reveal-row:first-child {
+    border-top: var(--sdl-reveal-divider-width, 1px) solid var(--sdl-reveal-divider-color, rgba(0,0,0,0.1));
+}
+
+.sdl-reveal-row:hover {
+    background-color: var(--sdl-reveal-hover-bg, transparent);
+}
+
+/* --- Content Layout: Default (title left, meta right) --- */
+.sdl-reveal-row-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    gap: 24px;
+    position: relative;
+    z-index: 2;
+}
+
+.sdl-reveal-left {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+    min-width: 0;
+}
+
+.sdl-reveal-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+}
+
+/* --- Title --- */
+.sdl-reveal-title {
+    font-size: var(--sdl-reveal-title-size, 32px);
+    font-weight: var(--sdl-reveal-title-weight, 500);
+    line-height: 1.2;
+    letter-spacing: var(--sdl-reveal-title-spacing, -0.02em);
+    color: var(--sdl-reveal-title-color, inherit);
+    margin: 0;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* --- Excerpt --- */
+.sdl-reveal-excerpt {
+    font-size: var(--sdl-reveal-excerpt-size, 14px);
+    color: var(--sdl-reveal-excerpt-color, #666);
+    line-height: 1.5;
+    margin: 0;
+    max-width: 500px;
+}
+
+/* --- Meta / Categories --- */
+.sdl-reveal-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+
+.sdl-reveal-tag {
+    font-size: var(--sdl-reveal-tag-size, 12px);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--sdl-reveal-tag-color, #555);
+    padding: var(--sdl-reveal-tag-pad-y, 4px) var(--sdl-reveal-tag-pad-x, 10px);
+    border: var(--sdl-reveal-tag-border-width, 1px) solid var(--sdl-reveal-tag-border-color, #ccc);
+    border-radius: var(--sdl-reveal-tag-radius, 3px);
+    background: var(--sdl-reveal-tag-bg, transparent);
+    white-space: nowrap;
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.sdl-reveal-row:hover .sdl-reveal-tag {
+    border-color: var(--sdl-reveal-tag-hover-border, #999);
+}
+
+/* --- Read More --- */
+.sdl-reveal-readmore {
+    font-size: var(--sdl-reveal-readmore-size, 13px);
+    font-weight: 500;
+    color: var(--sdl-reveal-readmore-color, #333);
+    white-space: nowrap;
+    transition: opacity 0.3s;
+}
+
+/* --- Number / Index --- */
+.sdl-reveal-index {
+    font-size: var(--sdl-reveal-index-size, 13px);
+    color: var(--sdl-reveal-index-color, #999);
+    font-variant-numeric: tabular-nums;
+    min-width: 28px;
+    flex-shrink: 0;
+}
+
+/* ============================================================
+   IMAGE REVEAL
+   ============================================================ */
+
+/* Shared image styles */
+.sdl-reveal-image {
+    position: absolute;
+    width: var(--sdl-reveal-img-width, 350px);
+    height: var(--sdl-reveal-img-height, 250px);
+    overflow: hidden;
+    border-radius: var(--sdl-reveal-img-radius, 8px);
+    pointer-events: none;
+    opacity: 0;
+    transform: scale(0.9);
+    transition: opacity 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+                transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+    z-index: 10;
+    box-shadow: var(--sdl-reveal-img-shadow, 0 12px 40px rgba(0,0,0,0.15));
+}
+
+.sdl-reveal-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.sdl-reveal-row:hover .sdl-reveal-image,
+.sdl-reveal-row.sdl-active .sdl-reveal-image {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* --- Position: Center --- */
+.sdl-reveal--img-center .sdl-reveal-image {
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%) scale(0.9);
+}
+.sdl-reveal--img-center .sdl-reveal-row:hover .sdl-reveal-image,
+.sdl-reveal--img-center .sdl-reveal-row.sdl-active .sdl-reveal-image {
+    transform: translate(-50%, -50%) scale(1);
+}
+
+/* --- Position: Left --- */
+.sdl-reveal--img-left .sdl-reveal-image {
+    left: var(--sdl-reveal-img-offset-x, 40px);
+    top: 50%;
+    transform: translateY(-50%) scale(0.9);
+}
+.sdl-reveal--img-left .sdl-reveal-row:hover .sdl-reveal-image,
+.sdl-reveal--img-left .sdl-reveal-row.sdl-active .sdl-reveal-image {
+    transform: translateY(-50%) scale(1);
+}
+
+/* --- Position: Right --- */
+.sdl-reveal--img-right .sdl-reveal-image {
+    right: var(--sdl-reveal-img-offset-x, 40px);
+    top: 50%;
+    transform: translateY(-50%) scale(0.9);
+}
+.sdl-reveal--img-right .sdl-reveal-row:hover .sdl-reveal-image,
+.sdl-reveal--img-right .sdl-reveal-row.sdl-active .sdl-reveal-image {
+    transform: translateY(-50%) scale(1);
+}
+
+/* --- Position: Cursor follow (JS positions via inline style) --- */
+.sdl-reveal--img-cursor .sdl-reveal-image {
+    position: fixed;
+    transition: opacity 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+                transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: left, top;
+}
+
+/* ============================================================
+   CONTENT LAYOUTS
+   ============================================================ */
+
+/* Layout: title-left (default) — title+excerpt left, meta+readmore right */
+
+/* Layout: title-right — meta left, title+excerpt right */
+.sdl-reveal--layout-title-right .sdl-reveal-row-inner {
+    flex-direction: row-reverse;
+}
+.sdl-reveal--layout-title-right .sdl-reveal-left {
+    align-items: flex-end;
+    text-align: right;
+}
+
+/* Layout: spread — title left, meta center, readmore right */
+.sdl-reveal--layout-spread .sdl-reveal-row-inner {
+    justify-content: flex-start;
+}
+.sdl-reveal--layout-spread .sdl-reveal-left {
+    flex: 0 1 auto;
+}
+.sdl-reveal--layout-spread .sdl-reveal-center {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+}
+.sdl-reveal--layout-spread .sdl-reveal-right {
+    flex: 0 0 auto;
+}
+
+/* Layout: stacked — everything stacked vertically in the row */
+.sdl-reveal--layout-stacked .sdl-reveal-row-inner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+/* ============================================================
+   HOVER EFFECTS
+   ============================================================ */
+
+/* Dim siblings on hover */
+.sdl-reveal--dim-siblings .sdl-reveal-row {
+    transition: opacity 0.3s ease, background-color 0.3s ease;
+}
+.sdl-reveal--dim-siblings:hover .sdl-reveal-row {
+    opacity: 0.3;
+}
+.sdl-reveal--dim-siblings:hover .sdl-reveal-row:hover {
+    opacity: 1;
+}
+
+/* Title slide up on hover */
+.sdl-reveal--title-slide .sdl-reveal-title {
+    transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.sdl-reveal--title-slide .sdl-reveal-row:hover .sdl-reveal-title {
+    transform: translateY(-4px);
+}
+
+/* ============================================================
+   MOBILE — stack rows, show image inline
+   ============================================================ */
+@media (max-width: 768px) {
+    .sdl-reveal-row-inner {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 12px;
+    }
+
+    .sdl-reveal-right {
+        align-self: flex-start;
+    }
+
+    .sdl-reveal-title {
+        font-size: var(--sdl-reveal-title-size-mobile, 22px) !important;
+    }
+
+    .sdl-reveal-row {
+        padding: 20px 0;
+    }
+
+    /* Mobile: show image inline above/below content instead of overlay */
+    .sdl-reveal-image {
+        position: relative !important;
+        width: 100% !important;
+        height: auto !important;
+        aspect-ratio: 16/10;
+        opacity: 1 !important;
+        transform: none !important;
+        pointer-events: auto;
+        left: auto !important;
+        right: auto !important;
+        top: auto !important;
+        margin-bottom: 12px;
+        box-shadow: none;
+    }
+
+    .sdl-reveal--img-cursor .sdl-reveal-image {
+        position: relative !important;
+    }
+
+    .sdl-reveal-left {
+        text-align: left !important;
+        align-items: flex-start !important;
+    }
+}

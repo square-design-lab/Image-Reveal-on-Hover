@@ -1,0 +1,1257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Image Reveal on Hover — Config Generator v1.0</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-body: #F5F5F7;
+            --bg-sidebar: #FFFFFF;
+            --text-main: #1C1C1E;
+            --text-secondary: #666666;
+            --text-tertiary: #999999;
+            --border-light: #E5E5E5;
+            --border-hover: #D4D4D4;
+            --border-active: #18181B;
+            --accent: #18181B;
+            --accent-hover: #09090B;
+            --accent-contrast: #FFFFFF;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
+            --radius-sm: 6px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --sidebar-width: 380px;
+            --header-height: 60px;
+        }
+
+        * { box-sizing: border-box; outline: none; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-body);
+            color: var(--text-main);
+            margin: 0; padding: 0;
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+            font-size: 13px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* --- SIDEBAR --- */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--bg-sidebar);
+            border-right: 1px solid var(--border-light);
+            display: flex;
+            flex-direction: column;
+            z-index: 20;
+        }
+
+        .sidebar-header {
+            height: var(--header-height);
+            padding: 0 24px;
+            border-bottom: 1px solid var(--border-light);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255,255,255,0.8);
+            backdrop-filter: blur(10px);
+        }
+
+        .sidebar-header h2 {
+            font-size: 15px; font-weight: 700; margin: 0;
+            display: flex; align-items: center; gap: 10px;
+            letter-spacing: -0.02em;
+        }
+
+        .brand-icon {
+            width: 30px; height: 30px;
+            background: var(--accent);
+            color: #fff;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .sidebar-header .badge {
+            font-size: 10px;
+            background: #F4F4F5;
+            padding: 2px 7px;
+            border-radius: 4px;
+            color: #52525B;
+            font-weight: 600;
+            border: 1px solid #D4D4D8;
+        }
+
+        .sidebar-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+        }
+
+        .sidebar-content::-webkit-scrollbar { width: 6px; }
+        .sidebar-content::-webkit-scrollbar-thumb { background: #E5E5E5; border-radius: 3px; }
+        .sidebar-content::-webkit-scrollbar-thumb:hover { background: #D4D4D4; }
+
+        .group { margin-bottom: 24px; }
+
+        .group-header {
+            font-size: 12px; font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: var(--text-tertiary);
+            margin-bottom: 12px;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: space-between;
+            transition: color 0.2s;
+        }
+        .group-header:hover { color: var(--text-main); }
+        .group-header::after {
+            content: '';
+            width: 6px; height: 6px;
+            border-right: 1.5px solid currentColor;
+            border-bottom: 1.5px solid currentColor;
+            transform: rotate(45deg);
+            transition: transform 0.2s;
+            margin-right: 4px;
+        }
+        .group.open .group-header::after { transform: rotate(-135deg); }
+        .group-body { display: none; }
+        .group.open .group-body { display: block; animation: slideIn 0.2s ease-out; }
+        @keyframes slideIn { from { opacity:0; transform:translateY(-5px); } to { opacity:1; transform:translateY(0); } }
+
+        .control-row { margin-bottom: 16px; }
+
+        label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 6px;
+            color: var(--text-main);
+        }
+
+        .helper-text {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-top: 6px;
+            line-height: 1.4;
+        }
+
+        input[type="text"], input[type="number"], select {
+            width: 100%;
+            height: 36px;
+            padding: 0 10px;
+            font-family: inherit;
+            font-size: 13px;
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-sm);
+            background: #fff;
+            color: var(--text-main);
+            transition: all 0.15s;
+            appearance: none;
+        }
+        input:hover, select:hover { border-color: var(--border-hover); }
+        input:focus, select:focus { border-color: var(--border-active); box-shadow: 0 0 0 3px rgba(0,0,0,0.08); }
+
+        select {
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 8px center;
+            background-size: 14px;
+            padding-right: 30px;
+        }
+
+        .toggle-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            min-height: 24px;
+        }
+        .toggle-row label { margin: 0; font-weight: 400; color: var(--text-secondary); }
+
+        input[type="checkbox"] {
+            appearance: none;
+            width: 36px; height: 20px;
+            background: #E5E5E5;
+            border-radius: 20px;
+            position: relative;
+            cursor: pointer;
+            transition: 0.2s;
+            border: none;
+        }
+        input[type="checkbox"]::after {
+            content: '';
+            position: absolute;
+            top: 2px; left: 2px;
+            width: 16px; height: 16px;
+            background: #fff;
+            border-radius: 50%;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+            transition: 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+        input[type="checkbox"]:checked { background: var(--accent); }
+        input[type="checkbox"]:checked::after { transform: translateX(16px); }
+
+        .color-row {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            background: #FAFAFA;
+            padding: 12px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-light);
+        }
+        .color-chip {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .color-chip .color-label { font-size: 12px; font-weight: 500; }
+
+        input[type="color"] {
+            width: 28px; height: 28px;
+            padding: 0;
+            border: 1.5px solid #B8B8B8;
+            border-radius: 50%;
+            overflow: hidden;
+            cursor: pointer;
+            background: none;
+        }
+        input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+        input[type="color"]::-webkit-color-swatch { border: none; border-radius: 50%; }
+
+        /* --- MAIN CONTENT --- */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #F5F5F7;
+            position: relative;
+        }
+
+        .topbar {
+            height: var(--header-height);
+            padding: 0 24px;
+            border-bottom: 1px solid var(--border-light);
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .device-toggle {
+            background: #F2F2F2;
+            padding: 2px;
+            border-radius: 6px;
+            display: flex;
+        }
+        .device-toggle button {
+            border: none;
+            background: transparent;
+            padding: 6px 12px;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-radius: 4px;
+            transition: 0.2s;
+        }
+        .device-toggle button.active {
+            background: #fff;
+            color: var(--text-main);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .copy-btn {
+            background: var(--accent);
+            color: var(--accent-contrast);
+            border: none;
+            padding: 9px 20px;
+            border-radius: 7px;
+            font-weight: 600;
+            font-size: 13px;
+            letter-spacing: -0.01em;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            transition: transform 0.1s, background 0.2s;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.18);
+        }
+        .copy-btn:hover { background: var(--accent-hover); }
+        .copy-btn:active { transform: scale(0.97); }
+        .copy-btn.copied { background: #0EA5E9; box-shadow: 0 1px 3px rgba(14,165,233,0.3); }
+
+        .preview-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            background-image: radial-gradient(#E1E1E1 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        #previewFrame {
+            background: #fff;
+            width: 100%;
+            max-width: 1100px;
+            min-height: 600px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            border-radius: var(--radius-lg);
+            padding: 48px;
+            transition: width 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            display: flex;
+            flex-direction: column;
+            border: 1px solid var(--border-light);
+            position: relative;
+            overflow: hidden;
+        }
+
+        #previewFrame.mobile {
+            width: 375px;
+            padding: 24px;
+            border-radius: 30px;
+            border: 8px solid #333;
+        }
+
+        .code-drawer {
+            height: 250px;
+            background: #0D0D0D;
+            color: #E1E1E1;
+            display: flex;
+            flex-direction: column;
+            border-top: 1px solid var(--border-light);
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .drawer-header {
+            padding: 10px 24px;
+            background: #1A1A1A;
+            border-bottom: 1px solid #333;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .drawer-header h3 {
+            margin: 0;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #888;
+        }
+        #codeOutput {
+            flex: 1;
+            padding: 24px;
+            margin: 0;
+            overflow: auto;
+            font-size: 12px;
+            line-height: 1.6;
+            color: #A9B7C6;
+        }
+        #codeOutput .hl-key   { color: #E5BF78; }
+        #codeOutput .hl-str   { color: #87C98F; }
+        #codeOutput .hl-bool  { color: #79B8FF; }
+        #codeOutput .hl-num   { color: #FF9D7C; }
+        #codeOutput .hl-tag   { color: #6B8CAE; }
+        #codeOutput .hl-kw    { color: #C678DD; }
+
+        .mobile-tabs { display: none; }
+        .mobile-copy-btn { display: none; }
+
+        @media (max-width: 1023px) {
+            body { flex-direction: column; height: 100vh; overflow: hidden; }
+            .main-content { display: none; }
+            .sidebar {
+                position: fixed;
+                top: 0; left: 0; right: 0;
+                bottom: calc(68px + env(safe-area-inset-bottom));
+                width: 100%;
+                border-right: none;
+                display: none;
+                flex-direction: column;
+                z-index: 50;
+            }
+            .sidebar-header { flex-shrink: 0; }
+            .mobile-tabs {
+                display: flex;
+                position: fixed; bottom: 0; left: 0; right: 0;
+                background: #fff;
+                border-top: 1px solid #E5E5E5;
+                z-index: 100;
+                height: 68px;
+                padding: 8px 12px;
+                padding-bottom: calc(8px + env(safe-area-inset-bottom));
+                gap: 6px;
+                align-items: stretch;
+            }
+            .tab-btn {
+                flex: 1;
+                border: none;
+                background: transparent;
+                color: var(--text-tertiary);
+                font-size: 11px;
+                font-weight: 500;
+                font-family: inherit;
+                cursor: pointer;
+                border-radius: 10px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 4px;
+                transition: background 0.18s ease, color 0.18s ease;
+                -webkit-tap-highlight-color: transparent;
+            }
+            .tab-btn svg { opacity: 0.5; transition: opacity 0.18s ease; }
+            .tab-btn.active { background: var(--accent); color: #fff; font-weight: 600; }
+            .tab-btn.active svg { opacity: 1; }
+            .mobile-copy-btn { display: flex; }
+            body.tab-edit .sidebar { display: flex; }
+            body.tab-edit .main-content { display: none; }
+            body.tab-preview .sidebar { display: none; }
+            body.tab-preview .main-content {
+                display: flex;
+                position: fixed;
+                top: 0; left: 0; right: 0;
+                bottom: calc(68px + env(safe-area-inset-bottom));
+                height: auto;
+            }
+            body.tab-preview .code-drawer { display: none; }
+            body.tab-code .sidebar { display: none; }
+            body.tab-code .main-content {
+                display: flex;
+                position: fixed;
+                top: 0; left: 0; right: 0;
+                bottom: calc(68px + env(safe-area-inset-bottom));
+                height: auto;
+            }
+            body.tab-code .preview-container { display: none; }
+            body.tab-code .code-drawer { flex: 1; height: auto; }
+        }
+
+        /* ============================================================
+           MOCK PREVIEW CSS — mirrors the real plugin
+           ============================================================ */
+        .mock-reveal {
+            position: relative;
+            width: 100%;
+        }
+
+        .mock-row {
+            position: relative;
+            display: flex;
+            align-items: center;
+            padding: 28px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            transition: background-color 0.3s ease, opacity 0.3s ease;
+            overflow: visible;
+        }
+        .mock-row:first-child {
+            border-top: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .mock-row-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            gap: 24px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .mock-left {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .mock-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+
+        .mock-center {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+        }
+
+        .mock-title {
+            font-size: 32px;
+            font-weight: 500;
+            line-height: 1.2;
+            letter-spacing: -0.02em;
+            margin: 0;
+            transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .mock-excerpt {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.5;
+            margin: 0;
+        }
+
+        .mock-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .mock-tag {
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #555;
+            padding: 4px 10px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            background: transparent;
+            white-space: nowrap;
+            transition: border-color 0.2s;
+        }
+
+        .mock-readmore {
+            font-size: 13px;
+            font-weight: 500;
+            color: #333;
+            white-space: nowrap;
+        }
+
+        .mock-index {
+            font-size: 13px;
+            color: #999;
+            font-variant-numeric: tabular-nums;
+            min-width: 28px;
+        }
+
+        /* Image */
+        .mock-img {
+            position: absolute;
+            width: 350px;
+            height: 250px;
+            overflow: hidden;
+            border-radius: 8px;
+            pointer-events: none;
+            opacity: 0;
+            transform: scale(0.9);
+            transition: opacity 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+                        transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+            z-index: 10;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+        }
+        .mock-img img {
+            width: 100%; height: 100%;
+            object-fit: cover; display: block;
+        }
+
+        .mock-row:hover .mock-img,
+        .mock-row.mock-active .mock-img {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        /* Image positions */
+        .mock-reveal.img-center .mock-img {
+            left: 50%; top: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+        }
+        .mock-reveal.img-center .mock-row:hover .mock-img {
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .mock-reveal.img-left .mock-img {
+            left: 40px; top: 50%;
+            transform: translateY(-50%) scale(0.9);
+        }
+        .mock-reveal.img-left .mock-row:hover .mock-img {
+            transform: translateY(-50%) scale(1);
+        }
+
+        .mock-reveal.img-right .mock-img {
+            right: 40px; top: 50%;
+            transform: translateY(-50%) scale(0.9);
+        }
+        .mock-reveal.img-right .mock-row:hover .mock-img {
+            transform: translateY(-50%) scale(1);
+        }
+
+        .mock-reveal.img-cursor .mock-img {
+            position: fixed;
+            will-change: left, top;
+            transition: opacity 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+                        transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        /* Content layouts */
+        .mock-reveal.layout-title-right .mock-row-inner {
+            flex-direction: row-reverse;
+        }
+        .mock-reveal.layout-title-right .mock-left {
+            align-items: flex-end;
+            text-align: right;
+        }
+
+        .mock-reveal.layout-spread .mock-row-inner {
+            justify-content: flex-start;
+        }
+        .mock-reveal.layout-spread .mock-left {
+            flex: 0 1 auto;
+        }
+
+        .mock-reveal.layout-stacked .mock-row-inner {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        /* Dim siblings */
+        .mock-reveal.dim-on:hover .mock-row { opacity: 0.3; }
+        .mock-reveal.dim-on:hover .mock-row:hover { opacity: 1; }
+
+        /* Title slide */
+        .mock-reveal.title-slide .mock-row:hover .mock-title {
+            transform: translateY(-4px);
+        }
+
+        /* Mobile preview */
+        #previewFrame.mobile .mock-row-inner {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 12px;
+        }
+        #previewFrame.mobile .mock-right { align-self: flex-start; }
+        #previewFrame.mobile .mock-title { font-size: 22px !important; }
+        #previewFrame.mobile .mock-row { padding: 20px 0; }
+        #previewFrame.mobile .mock-img {
+            position: relative !important;
+            width: 100% !important;
+            height: auto !important;
+            aspect-ratio: 16/10;
+            opacity: 1 !important;
+            transform: none !important;
+            pointer-events: auto;
+            left: auto !important;
+            right: auto !important;
+            top: auto !important;
+            margin-bottom: 12px;
+            box-shadow: none;
+        }
+        #previewFrame.mobile .mock-left {
+            text-align: left !important;
+            align-items: flex-start !important;
+        }
+    </style>
+</head>
+<body class="tab-edit">
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+    <div class="sidebar-header">
+        <h2>
+            <span class="brand-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 3v18"/></svg>
+            </span>
+            Image Reveal
+        </h2>
+        <span class="badge">v1.0</span>
+        <button class="copy-btn mobile-copy-btn" onclick="copyCode()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            Copy Code
+        </button>
+    </div>
+    <div class="sidebar-content">
+
+        <!-- LAYOUT -->
+        <div class="group open">
+            <div class="group-header" onclick="this.parentElement.classList.toggle('open')">Layout</div>
+            <div class="group-body">
+                <div class="control-row">
+                    <label>Image Position</label>
+                    <select id="imagePosition" onchange="update()">
+                        <option value="center">Center (overlay)</option>
+                        <option value="left">Left</option>
+                        <option value="right">Right</option>
+                        <option value="cursor">Follow Cursor</option>
+                    </select>
+                    <div class="helper-text">Where the image appears on hover. "Follow Cursor" tracks the mouse.</div>
+                </div>
+                <div class="control-row">
+                    <label>Content Layout</label>
+                    <select id="contentLayout" onchange="update()">
+                        <option value="title-left">Title Left, Meta Right</option>
+                        <option value="title-right">Meta Left, Title Right</option>
+                        <option value="spread">Title Left, Meta Center, Link Right</option>
+                        <option value="stacked">Stacked (all left)</option>
+                    </select>
+                </div>
+                <div class="control-row">
+                    <label>Image Size</label>
+                    <div style="display:flex;gap:8px;">
+                        <div style="flex:1">
+                            <input type="text" id="imgWidth" value="350px" onchange="update()" placeholder="Width" />
+                        </div>
+                        <div style="flex:1">
+                            <input type="text" id="imgHeight" value="250px" onchange="update()" placeholder="Height" />
+                        </div>
+                    </div>
+                </div>
+                <div class="control-row">
+                    <label>Image Border Radius</label>
+                    <input type="text" id="imgRadius" value="8px" onchange="update()" />
+                </div>
+            </div>
+        </div>
+
+        <!-- VISIBILITY -->
+        <div class="group open">
+            <div class="group-header" onclick="this.parentElement.classList.toggle('open')">Visibility</div>
+            <div class="group-body">
+                <div class="toggle-row">
+                    <label>Show Excerpt</label>
+                    <input type="checkbox" id="showExcerpt" checked onchange="update()" />
+                </div>
+                <div class="toggle-row">
+                    <label>Show Meta Tags</label>
+                    <input type="checkbox" id="showMeta" checked onchange="update()" />
+                </div>
+                <div class="toggle-row">
+                    <label>Show Read More</label>
+                    <input type="checkbox" id="showReadMore" checked onchange="update()" />
+                </div>
+                <div class="toggle-row">
+                    <label>Show Index Numbers</label>
+                    <input type="checkbox" id="showIndex" onchange="update()" />
+                </div>
+                <div class="control-row">
+                    <label>Read More Text</label>
+                    <input type="text" id="readMoreText" value="View Project →" onchange="update()" />
+                </div>
+            </div>
+        </div>
+
+        <!-- EFFECTS -->
+        <div class="group open">
+            <div class="group-header" onclick="this.parentElement.classList.toggle('open')">Effects</div>
+            <div class="group-body">
+                <div class="toggle-row">
+                    <label>Dim Other Rows on Hover</label>
+                    <input type="checkbox" id="dimSiblings" checked onchange="update()" />
+                </div>
+                <div class="toggle-row">
+                    <label>Title Slide Up on Hover</label>
+                    <input type="checkbox" id="titleSlide" checked onchange="update()" />
+                </div>
+            </div>
+        </div>
+
+        <!-- TYPOGRAPHY -->
+        <div class="group">
+            <div class="group-header" onclick="this.parentElement.classList.toggle('open')">Typography</div>
+            <div class="group-body">
+                <div class="control-row">
+                    <label>Title Size</label>
+                    <input type="text" id="titleSize" value="32px" onchange="update()" />
+                </div>
+                <div class="control-row">
+                    <label>Title Weight</label>
+                    <select id="titleWeight" onchange="update()">
+                        <option value="400">400 — Regular</option>
+                        <option value="500" selected>500 — Medium</option>
+                        <option value="600">600 — Semi-Bold</option>
+                        <option value="700">700 — Bold</option>
+                    </select>
+                </div>
+                <div class="control-row">
+                    <label>Title Letter Spacing</label>
+                    <input type="text" id="titleSpacing" value="-0.02em" onchange="update()" />
+                </div>
+                <div class="control-row">
+                    <label>Title Size (Mobile)</label>
+                    <input type="text" id="titleSizeMobile" value="22px" onchange="update()" />
+                </div>
+                <div class="control-row">
+                    <label>Excerpt Size</label>
+                    <input type="text" id="excerptSize" value="14px" onchange="update()" />
+                </div>
+                <div class="control-row">
+                    <label>Tag Size</label>
+                    <input type="text" id="tagSize" value="12px" onchange="update()" />
+                </div>
+            </div>
+        </div>
+
+        <!-- COLORS -->
+        <div class="group">
+            <div class="group-header" onclick="this.parentElement.classList.toggle('open')">Colors</div>
+            <div class="group-body">
+                <div class="color-row">
+                    <div class="color-chip">
+                        <span class="color-label">Title Color</span>
+                        <input type="color" id="titleColor" value="#1C1C1E" onchange="update()" />
+                    </div>
+                    <div class="color-chip">
+                        <span class="color-label">Excerpt Color</span>
+                        <input type="color" id="excerptColor" value="#666666" onchange="update()" />
+                    </div>
+                    <div class="color-chip">
+                        <span class="color-label">Tag Text Color</span>
+                        <input type="color" id="tagColor" value="#555555" onchange="update()" />
+                    </div>
+                    <div class="color-chip">
+                        <span class="color-label">Tag Border Color</span>
+                        <input type="color" id="tagBorderColor" value="#cccccc" onchange="update()" />
+                    </div>
+                    <div class="color-chip">
+                        <span class="color-label">Tag Background</span>
+                        <input type="color" id="tagBg" value="#ffffff" onchange="update()" />
+                    </div>
+                    <div class="color-chip">
+                        <span class="color-label">Divider Color</span>
+                        <input type="color" id="dividerColor" value="#e5e5e5" onchange="update()" />
+                    </div>
+                    <div class="color-chip">
+                        <span class="color-label">Hover Background</span>
+                        <input type="color" id="hoverBg" value="#f5f5f5" onchange="update()" />
+                    </div>
+                    <div class="color-chip">
+                        <span class="color-label">Read More Color</span>
+                        <input type="color" id="readMoreColor" value="#333333" onchange="update()" />
+                    </div>
+                    <div class="color-chip">
+                        <span class="color-label">Index Color</span>
+                        <input type="color" id="indexColor" value="#999999" onchange="update()" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SPACING -->
+        <div class="group">
+            <div class="group-header" onclick="this.parentElement.classList.toggle('open')">Spacing</div>
+            <div class="group-body">
+                <div class="control-row">
+                    <label>Row Padding (Vertical)</label>
+                    <input type="text" id="rowPadY" value="28px" onchange="update()" />
+                </div>
+                <div class="control-row">
+                    <label>Row Padding (Horizontal)</label>
+                    <input type="text" id="rowPadX" value="0" onchange="update()" />
+                </div>
+                <div class="control-row">
+                    <label>Divider Width</label>
+                    <input type="text" id="dividerWidth" value="1px" onchange="update()" />
+                </div>
+                <div class="control-row">
+                    <label>Tag Border Width</label>
+                    <input type="text" id="tagBorderWidth" value="1px" onchange="update()" />
+                </div>
+                <div class="control-row">
+                    <label>Tag Border Radius</label>
+                    <input type="text" id="tagRadius" value="3px" onchange="update()" />
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- MAIN -->
+<div class="main-content">
+    <div class="topbar">
+        <div class="device-toggle">
+            <button class="active" onclick="setDevice('desktop',this)">Desktop</button>
+            <button onclick="setDevice('mobile',this)">Mobile</button>
+        </div>
+        <button class="copy-btn" onclick="copyCode()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            Copy Code
+        </button>
+    </div>
+    <div class="preview-container">
+        <div id="previewFrame"></div>
+    </div>
+    <div class="code-drawer">
+        <div class="drawer-header">
+            <h3>Generated Code</h3>
+        </div>
+        <pre id="codeOutput"></pre>
+    </div>
+</div>
+
+<!-- MOBILE TABS -->
+<div class="mobile-tabs">
+    <button class="tab-btn active" onclick="setTab('edit',this)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        Settings
+    </button>
+    <button class="tab-btn" onclick="setTab('preview',this)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        Preview
+    </button>
+    <button class="tab-btn" onclick="setTab('code',this)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        Code
+    </button>
+</div>
+
+<script>
+/* ============================================================
+   MOCK DATA
+   ============================================================ */
+var MOCK_ITEMS = [
+    { title: 'Redefine Success',            excerpt: 'It All Begins Here',  meta: ['News'],               img: 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=600&h=400&fit=crop' },
+    { title: 'Small Steps Create Big Shifts', excerpt: 'It All Begins Here',  meta: ['Blog', 'Article'],    img: 'https://images.unsplash.com/photo-1497215728101-856f4ea42174?w=600&h=400&fit=crop' },
+    { title: 'Turn Intention Into Action',    excerpt: 'It All Begins Here',  meta: ['Article'],            img: 'https://images.unsplash.com/photo-1497366811353-6870744d04b2?w=600&h=400&fit=crop' },
+    { title: 'Make Room for Growth',          excerpt: 'It All Begins Here',  meta: ['Podcast'],            img: 'https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=600&h=400&fit=crop' },
+    { title: 'The Art of Letting Go',         excerpt: 'It All Begins Here',  meta: ['News', 'Article'],    img: 'https://images.unsplash.com/photo-1505409859467-3a796fd5a263?w=600&h=400&fit=crop' },
+    { title: 'Embrace the Unknown',           excerpt: 'It All Begins Here',  meta: ['Blog'],               img: 'https://images.unsplash.com/photo-1497215842964-222b430dc094?w=600&h=400&fit=crop' }
+];
+
+/* ============================================================
+   STATE
+   ============================================================ */
+function val(id) { return document.getElementById(id).value; }
+function checked(id) { return document.getElementById(id).checked; }
+
+function getConfig() {
+    return {
+        imagePosition:   val('imagePosition'),
+        contentLayout:   val('contentLayout'),
+        showExcerpt:     checked('showExcerpt'),
+        showMeta:        checked('showMeta'),
+        showReadMore:    checked('showReadMore'),
+        showIndex:       checked('showIndex'),
+        dimSiblings:     checked('dimSiblings'),
+        titleSlide:      checked('titleSlide'),
+        hoverBg:         val('hoverBg'),
+        dividerColor:    val('dividerColor'),
+        dividerWidth:    val('dividerWidth'),
+        titleSize:       val('titleSize'),
+        titleWeight:     val('titleWeight'),
+        titleSpacing:    val('titleSpacing'),
+        titleColor:      val('titleColor'),
+        titleSizeMobile: val('titleSizeMobile'),
+        excerptSize:     val('excerptSize'),
+        excerptColor:    val('excerptColor'),
+        tagSize:         val('tagSize'),
+        tagColor:        val('tagColor'),
+        tagBg:           val('tagBg') === '#ffffff' ? 'transparent' : val('tagBg'),
+        tagBorderColor:  val('tagBorderColor'),
+        tagBorderWidth:  val('tagBorderWidth'),
+        tagRadius:       val('tagRadius'),
+        readMoreText:    val('readMoreText'),
+        readMoreColor:   val('readMoreColor'),
+        indexColor:      val('indexColor'),
+        imgWidth:        val('imgWidth'),
+        imgHeight:       val('imgHeight'),
+        imgRadius:       val('imgRadius'),
+        rowPadY:         val('rowPadY'),
+        rowPadX:         val('rowPadX')
+    };
+}
+
+/* ============================================================
+   RENDER PREVIEW
+   ============================================================ */
+function renderPreview(cfg) {
+    var frame = document.getElementById('previewFrame');
+    var isMobile = frame.classList.contains('mobile');
+
+    var cls = 'mock-reveal';
+    cls += ' img-' + cfg.imagePosition;
+    cls += ' layout-' + cfg.contentLayout;
+    if (cfg.dimSiblings) cls += ' dim-on';
+    if (cfg.titleSlide) cls += ' title-slide';
+
+    var html = '<div class="' + cls + '" style="';
+    html += '--mock-title-size:' + cfg.titleSize + ';';
+    html += '--mock-title-weight:' + cfg.titleWeight + ';';
+    html += '--mock-title-spacing:' + cfg.titleSpacing + ';';
+    html += '--mock-title-color:' + cfg.titleColor + ';';
+    html += '--mock-excerpt-size:' + cfg.excerptSize + ';';
+    html += '--mock-excerpt-color:' + cfg.excerptColor + ';';
+    html += '--mock-tag-size:' + cfg.tagSize + ';';
+    html += '--mock-tag-color:' + cfg.tagColor + ';';
+    html += '--mock-tag-bg:' + cfg.tagBg + ';';
+    html += '--mock-tag-border:' + cfg.tagBorderColor + ';';
+    html += '--mock-tag-bw:' + cfg.tagBorderWidth + ';';
+    html += '--mock-tag-radius:' + cfg.tagRadius + ';';
+    html += '--mock-divider:' + cfg.dividerColor + ';';
+    html += '--mock-divider-w:' + cfg.dividerWidth + ';';
+    html += '--mock-hover-bg:' + cfg.hoverBg + ';';
+    html += '--mock-rm-color:' + cfg.readMoreColor + ';';
+    html += '--mock-idx-color:' + cfg.indexColor + ';';
+    html += '--mock-img-w:' + cfg.imgWidth + ';';
+    html += '--mock-img-h:' + cfg.imgHeight + ';';
+    html += '--mock-img-r:' + cfg.imgRadius + ';';
+    html += '--mock-pad-y:' + cfg.rowPadY + ';';
+    html += '--mock-pad-x:' + cfg.rowPadX + ';';
+    html += '">';
+
+    MOCK_ITEMS.forEach(function(item, i) {
+        html += '<div class="mock-row" style="padding:' + cfg.rowPadY + ' ' + cfg.rowPadX + ';border-bottom-color:' + cfg.dividerColor + ';border-bottom-width:' + cfg.dividerWidth + ';' + (i === 0 ? 'border-top:' + cfg.dividerWidth + ' solid ' + cfg.dividerColor + ';' : '') + '">';
+
+        // Image
+        html += '<div class="mock-img" style="width:' + cfg.imgWidth + ';height:' + cfg.imgHeight + ';border-radius:' + cfg.imgRadius + ';">';
+        html += '<img src="' + item.img + '" alt="' + item.title + '" />';
+        html += '</div>';
+
+        html += '<div class="mock-row-inner">';
+
+        // Left
+        html += '<div class="mock-left">';
+        if (cfg.showIndex) {
+            html += '<span class="mock-index" style="color:' + cfg.indexColor + ';">' + String(i+1).padStart(2,'0') + '</span>';
+        }
+        html += '<h3 class="mock-title" style="font-size:' + cfg.titleSize + ';font-weight:' + cfg.titleWeight + ';letter-spacing:' + cfg.titleSpacing + ';color:' + cfg.titleColor + ';">' + item.title + '</h3>';
+        if (cfg.showExcerpt) {
+            html += '<p class="mock-excerpt" style="font-size:' + cfg.excerptSize + ';color:' + cfg.excerptColor + ';">' + item.excerpt + '</p>';
+        }
+        html += '</div>';
+
+        // Center (spread layout)
+        if (cfg.contentLayout === 'spread' && cfg.showMeta && item.meta.length) {
+            html += '<div class="mock-center"><div class="mock-meta">';
+            item.meta.forEach(function(m) {
+                html += '<span class="mock-tag" style="font-size:' + cfg.tagSize + ';color:' + cfg.tagColor + ';background:' + cfg.tagBg + ';border:' + cfg.tagBorderWidth + ' solid ' + cfg.tagBorderColor + ';border-radius:' + cfg.tagRadius + ';">' + m + '</span>';
+            });
+            html += '</div></div>';
+        }
+
+        // Right
+        html += '<div class="mock-right">';
+        if (cfg.contentLayout !== 'spread' && cfg.showMeta && item.meta.length) {
+            html += '<div class="mock-meta">';
+            item.meta.forEach(function(m) {
+                html += '<span class="mock-tag" style="font-size:' + cfg.tagSize + ';color:' + cfg.tagColor + ';background:' + cfg.tagBg + ';border:' + cfg.tagBorderWidth + ' solid ' + cfg.tagBorderColor + ';border-radius:' + cfg.tagRadius + ';">' + m + '</span>';
+            });
+            html += '</div>';
+        }
+        if (cfg.showReadMore) {
+            html += '<span class="mock-readmore" style="color:' + cfg.readMoreColor + ';">' + cfg.readMoreText + '</span>';
+        }
+        html += '</div>';
+
+        html += '</div>'; // row-inner
+        html += '</div>'; // row
+    });
+
+    html += '</div>';
+    frame.innerHTML = html;
+
+    // Bind hover bg
+    var rows = frame.querySelectorAll('.mock-row');
+    rows.forEach(function(row) {
+        row.addEventListener('mouseenter', function() {
+            row.style.backgroundColor = cfg.hoverBg;
+        });
+        row.addEventListener('mouseleave', function() {
+            row.style.backgroundColor = 'transparent';
+        });
+    });
+
+    // Cursor follow
+    if (cfg.imagePosition === 'cursor') {
+        bindMockCursor(frame);
+    }
+}
+
+function bindMockCursor(frame) {
+    var rows = frame.querySelectorAll('.mock-row');
+    rows.forEach(function(row) {
+        var imgEl = row.querySelector('.mock-img');
+        if (!imgEl) return;
+
+        var targetX = 0, targetY = 0;
+        var currentX = 0, currentY = 0;
+        var rafId = null;
+
+        function lerp(a, b, t) { return a + (b - a) * t; }
+
+        function animate() {
+            currentX = lerp(currentX, targetX, 0.12);
+            currentY = lerp(currentY, targetY, 0.12);
+            imgEl.style.left = currentX + 'px';
+            imgEl.style.top  = currentY + 'px';
+            rafId = requestAnimationFrame(animate);
+        }
+
+        row.addEventListener('mouseenter', function() {
+            rafId = requestAnimationFrame(animate);
+        });
+
+        row.addEventListener('mousemove', function(e) {
+            targetX = e.clientX + 20;
+            targetY = e.clientY + 20;
+        });
+
+        row.addEventListener('mouseleave', function() {
+            if (rafId) cancelAnimationFrame(rafId);
+            rafId = null;
+        });
+    });
+}
+
+/* ============================================================
+   CODE GENERATION
+   ============================================================ */
+function generateCode(cfg) {
+    var REPO = 'https://cdn.jsdelivr.net/gh/square-design-lab/Image-Reveal-on-Hover@latest';
+
+    var lines = [];
+    lines.push('&lt;!-- SDL Image Reveal on Hover v1.0 --&gt;');
+    lines.push('&lt;link rel="stylesheet" href="' + REPO + '/imageReveal.css" /&gt;');
+    lines.push('');
+    lines.push('&lt;script&gt;');
+    lines.push('window.SDL_REVEAL_CONFIG = {');
+
+    var entries = [];
+    var DEFAULTS = {
+        imagePosition:'center', contentLayout:'title-left',
+        showExcerpt:true, showMeta:true, showReadMore:true, showIndex:false,
+        dimSiblings:true, titleSlide:true,
+        hoverBg:'transparent', dividerColor:'rgba(0,0,0,0.1)', dividerWidth:'1px',
+        titleSize:'32px', titleWeight:'500', titleSpacing:'-0.02em', titleColor:'inherit',
+        titleSizeMobile:'22px', excerptSize:'14px', excerptColor:'#666',
+        tagSize:'12px', tagColor:'#555', tagBg:'transparent', tagBorderColor:'#ccc',
+        tagBorderWidth:'1px', tagRadius:'3px',
+        readMoreText:'View Project →', readMoreColor:'#333',
+        indexColor:'#999', imgWidth:'350px', imgHeight:'250px', imgRadius:'8px',
+        rowPadY:'28px', rowPadX:'0'
+    };
+
+    for (var k in cfg) {
+        if (cfg[k] !== DEFAULTS[k]) {
+            var v = cfg[k];
+            if (typeof v === 'boolean') {
+                entries.push('    <span class="hl-key">' + k + '</span>: <span class="hl-bool">' + v + '</span>');
+            } else {
+                entries.push('    <span class="hl-key">' + k + '</span>: <span class="hl-str">\'' + v + '\'</span>');
+            }
+        }
+    }
+
+    lines.push(entries.join(',\n'));
+    lines.push('};');
+    lines.push('&lt;/scr' + 'ipt&gt;');
+    lines.push('&lt;scr' + 'ipt src="' + REPO + '/imageReveal.js"&gt;&lt;/scr' + 'ipt&gt;');
+
+    return lines.join('\n');
+}
+
+/* ============================================================
+   UPDATE
+   ============================================================ */
+function update() {
+    var cfg = getConfig();
+    renderPreview(cfg);
+    document.getElementById('codeOutput').innerHTML = generateCode(cfg);
+}
+
+/* ============================================================
+   COPY
+   ============================================================ */
+function copyCode() {
+    var cfg = getConfig();
+    var REPO = 'https://cdn.jsdelivr.net/gh/square-design-lab/Image-Reveal-on-Hover@latest';
+
+    var DEFAULTS = {
+        imagePosition:'center', contentLayout:'title-left',
+        showExcerpt:true, showMeta:true, showReadMore:true, showIndex:false,
+        dimSiblings:true, titleSlide:true,
+        hoverBg:'transparent', dividerColor:'rgba(0,0,0,0.1)', dividerWidth:'1px',
+        titleSize:'32px', titleWeight:'500', titleSpacing:'-0.02em', titleColor:'inherit',
+        titleSizeMobile:'22px', excerptSize:'14px', excerptColor:'#666',
+        tagSize:'12px', tagColor:'#555', tagBg:'transparent', tagBorderColor:'#ccc',
+        tagBorderWidth:'1px', tagRadius:'3px',
+        readMoreText:'View Project →', readMoreColor:'#333',
+        indexColor:'#999', imgWidth:'350px', imgHeight:'250px', imgRadius:'8px',
+        rowPadY:'28px', rowPadX:'0'
+    };
+
+    var lines = [];
+    lines.push('<!-- SDL Image Reveal on Hover v1.0 -->');
+    lines.push('<link rel="stylesheet" href="' + REPO + '/imageReveal.css" />');
+    lines.push('');
+    lines.push('<scr' + 'ipt>');
+    lines.push('window.SDL_REVEAL_CONFIG = {');
+
+    var entries = [];
+    for (var k in cfg) {
+        if (cfg[k] !== DEFAULTS[k]) {
+            var v = cfg[k];
+            if (typeof v === 'boolean') {
+                entries.push('    ' + k + ': ' + v);
+            } else {
+                entries.push('    ' + k + ': \'' + v + '\'');
+            }
+        }
+    }
+    lines.push(entries.join(',\n'));
+    lines.push('};');
+    lines.push('</scr' + 'ipt>');
+    lines.push('<scr' + 'ipt src="' + REPO + '/imageReveal.js"></scr' + 'ipt>');
+
+    var text = lines.join('\n');
+    navigator.clipboard.writeText(text).then(function() {
+        var btns = document.querySelectorAll('.copy-btn');
+        btns.forEach(function(b) {
+            b.classList.add('copied');
+            b.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Copied!';
+        });
+        setTimeout(function() {
+            btns.forEach(function(b) {
+                b.classList.remove('copied');
+                b.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy Code';
+            });
+        }, 2000);
+    });
+}
+
+/* ============================================================
+   HELPERS
+   ============================================================ */
+function setDevice(mode, btn) {
+    var frame = document.getElementById('previewFrame');
+    frame.classList.toggle('mobile', mode === 'mobile');
+    btn.parentElement.querySelectorAll('button').forEach(function(b) { b.classList.remove('active'); });
+    btn.classList.add('active');
+    update();
+}
+
+function setTab(tab, btn) {
+    document.body.className = 'tab-' + tab;
+    document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
+    btn.classList.add('active');
+    if (tab === 'preview' || tab === 'code') update();
+}
+
+/* Init */
+update();
+</script>
+
+</body>
+</html>
