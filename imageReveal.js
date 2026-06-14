@@ -250,9 +250,9 @@
     }
 
     function init() {
-        var sections = document.querySelectorAll('[data-section-id]');
+        var sections = document.querySelectorAll('section[id^="image-hover-reveal"]');
         sections.forEach(function (section) {
-            var id = section.getAttribute('data-section-id');
+            var id = section.id;
             if (!id || !/^image-hover-reveal(-\d+)?$/.test(id)) return;
 
             var blocks = section.querySelectorAll('.sqs-block-summary-v2');
